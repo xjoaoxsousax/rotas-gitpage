@@ -1,8 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Bus, Info, ArrowRight, Map as MapIcon } from 'lucide-react';
-import { MapContainer, TileLayer, GeoJSON, useMap, LayersControl } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, useMap, LayersControl, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { toGPX } from '@tmcw/togpx';
+import L from 'leaflet';
+
+// Ícones personalizados para os marcadores
+const startIcon = new L.Icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', // Ícone para o ponto inicial
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
+const endIcon = new L.Icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/149/149060.png', // Ícone para o ponto final
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
 
 interface RouteDetails {
   short_name: string;
@@ -291,9 +307,64 @@ function App() {
                       />
                     </LayersControl.BaseLayer>
                   </LayersControl>
+
                   {shapeData && <GeoJSON key={selectedPattern?.id} data={shapeData.geojson} />}
                   {shapeData && <MapUpdater geojson={shapeData.geojson} />}
+
+                  {/* Adiciona os marcadores de início e fim */}
+                  {shapeData && shapeData.geojson && (
+                    <>
+                      {/* Ponto inicial */}
+                      <Marker
+                        position={[
+                          shapeData.geojson.geometry.coordinates[0][1],
+                          shapeData.geojson.geometry.coordinates[0][0],
+                        ]}
+                        icon={startIcon}
+                      >
+                        <Popup>Origem</Popup>
+                      </Marker>
+
+                      {/* Ponto final */}
+                      <Marker
+                        position={[
+                          shapeData.geojson.geometry.coordinates[
+                            shapeData.geojson.geometry.coordinates.length - 1
+                          ][1],
+                          shapeData.geojson.geometry.coordinates[
+                            shapeData.geojson.geometry.coordinates.length - 1
+                          ][0],
+                        ]}
+                        icon={endIcon}
+                      >
+                        <Popup>Destino</Popup>
+                      </Marker>
+                    </>
+                  )}
                 </MapContainer>
+              </div>
+
+              {/* Legenda dos pontos de origem e destino */}
+              <div className="mt-4 flex items-center gap-4">
+                {/* Ponto de origem */}
+                <div className="flex items-center gap-2">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/684/684908.png"
+                    alt="Ponto de origem"
+                    className="w-6 h-6"
+                  />
+                  <span className="text-gray-700 font-medium">Origem</span>
+                </div>
+
+                {/* Ponto de destino */}
+                <div className="flex items-center gap-2">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/149/149060.png"
+                    alt="Ponto de destino"
+                    className="w-6 h-6"
+                  />
+                  <span className="text-gray-700 font-medium">Destino</span>
+                </div>
               </div>
 
               {/* Botão para baixar GPX */}
